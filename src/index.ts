@@ -1,7 +1,23 @@
+// $ parcel index.html -> ts run client server
+// $ json-server -w db.json  - to run json (backend) server in terminal
+
+/*
+! assign backend and client in the package.json so now can just run:
+  $ npm run start:db - run backend server
+  $ npm run start:parcel - run client server
+*/
 //! Framework idea
 /*
   Model Classes => Handle data, used to represent Users, Blog Posts, Images, etc
   View Classes => Handle HTML and events caused by the user (like clicks)
+*/
+
+//! backend servers
+/*
+  $ npm install -g json-server
+  use 'JSON Server' to contain the user data
+    User Instance | axios -> save()  ->  JSON Server
+                          <- fetch() <-
 */
 
 //! Framework steps
@@ -32,8 +48,17 @@ import { User } from './models/Users';
 const user = new User({ name: 'dan', age: 25 });
 const newUser = new User({}); // also works 'cause the ? in the interface make variable is optional
 
-user.set({ name: 'newDan', age: 666 });
-user.set({ name: 'bigOldDan' });
+user.on('change', () => {
+  console.log('Change#1');
+});
+user.on('click', () => {
+  console.log('clicked');
+});
+user.on('change', () => {
+  console.log('Change#2')
+});
 
-console.log(user.get('name'));
-console.log(user.get('age'));
+console.log(user);
+
+user.trigger('change');
+user.trigger('click');

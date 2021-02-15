@@ -124,12 +124,16 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.User = void 0;
+/*
+ eventing in JavaScript: An HTML event can be something the browser does, or something a user does. (.addEventListener())
+*/
 
 var User =
 /** @class */
 function () {
   function User(data) {
     this.data = data;
+    this.events = {};
   }
 
   User.prototype.get = function (propName) {
@@ -140,21 +144,56 @@ function () {
     Object.assign(this.data, update);
   };
 
+  User.prototype.on = function (eventName, callback) {
+    // first step: assign eventName as key in events obj
+    var handlers = this.events[eventName] || [];
+    handlers.push(callback);
+    this.events[eventName] = handlers;
+  };
+
+  User.prototype.trigger = function (eventName) {
+    var handlers = this.events[eventName];
+
+    if (!handlers || handlers.length === 0) {
+      return;
+    }
+
+    handlers.forEach(function (callback) {
+      callback();
+    });
+  };
+
   return User;
 }();
 
 exports.User = User;
 },{}],"src/index.ts":[function(require,module,exports) {
-"use strict"; //! Framework idea
+"use strict"; // $ parcel index.html -> ts run client server
+// $ json-server -w db.json  - to run json (backend) server in terminal
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+/*
+! assign backend and client in the package.json so now can just run:
+  $ npm run start:db - run backend server
+  $ npm run start:parcel - run client server
+*/
+//! Framework idea
 
 /*
   Model Classes => Handle data, used to represent Users, Blog Posts, Images, etc
   View Classes => Handle HTML and events caused by the user (like clicks)
 */
+//! backend servers
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-}); //! Framework steps
+/*
+  $ npm install -g json-server
+  use 'JSON Server' to contain the user data
+    User Instance | axios -> save()  ->  JSON Server
+                          <- fetch() <-
+*/
+//! Framework steps
 
 /*
   1. Create a class to represent a User and all of its data (like name and age)
@@ -185,15 +224,18 @@ var user = new Users_1.User({
 });
 var newUser = new Users_1.User({}); // also works 'cause the ? in the interface make variable is optional
 
-user.set({
-  name: 'newDan',
-  age: 666
+user.on('change', function () {
+  console.log('Change#1');
 });
-user.set({
-  name: 'bigOldDan'
+user.on('click', function () {
+  console.log('clicked');
 });
-console.log(user.get('name'));
-console.log(user.get('age'));
+user.on('change', function () {
+  console.log('Change#2');
+});
+console.log(user);
+user.trigger('change');
+user.trigger('click');
 },{"./models/Users":"src/models/Users.ts"}],"../../../../AppData/Roaming/npm/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
@@ -222,7 +264,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "5906" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "1438" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
