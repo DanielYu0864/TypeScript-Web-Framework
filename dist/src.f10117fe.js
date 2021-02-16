@@ -2131,9 +2131,10 @@ var Users_1 = require("./models/Users");
 var user = new Users_1.User({
   name: 'new record',
   age: 0
-}); // user.fetch();
-
-user.save();
+});
+user.events.on('change', function () {
+  console.log('changed!');
+});
 },{"./models/Users":"src/models/Users.ts"}],"../../../../AppData/Roaming/npm/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
