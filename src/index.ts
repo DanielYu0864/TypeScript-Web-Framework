@@ -20,13 +20,14 @@
                           <- fetch() <-
 */
 
-//! Framework steps
+//! Framework steps and needs
 /*
-  1. Create a class to represent a User and all of its data (like name and age)
+  M. Create a class to represent a User and all of its data (like name and age)
     a. User class needs to have the ability to store some data, retrieve it, and change it
     b. Also needs to have the ability to notify the rest of the app when some data is changed
     c. User needs to be able to persist dat to an outside server, and the retrieve it at some future point
-  *Extraction Approach:
+
+    *Extraction Approach:
     I Build class User as a 'mega' class with tons of methods (in src/models/User.ts):
       class User {
         private data: UserProps; -> Object to store info about a particular user (name, age)
@@ -44,6 +45,7 @@
         events: Events; -> Gives us the ability to tell other parts of our application whenever data tied to a particular user is changed
         sync:Sync; -> Gives us the ability to save this persons data to a remote server, then retrieve it in the future
       }
+
     III Refactor User to be a reusable class that can represent any piece of data, not just a User
 */
 
@@ -52,7 +54,9 @@ import { User } from './models/Users';
 
 const user = new User({ name: 'new record', age: 0 });
 
-// user.fetch();
 
 
-user.save();
+
+user.events.on('change', () => {
+  console.log('changed!')
+});

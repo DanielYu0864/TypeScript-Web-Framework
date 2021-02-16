@@ -68,24 +68,23 @@
 //     }
 //   }
 // }
-// ! Pefactor User to use composition: ########################################################################################################################
-import axios, { AxiosResponse } from 'axios';
 
+
+// ! Extraction Approach II: Pefactor User to use composition: ########################################################################################################################
+import axios, { AxiosResponse } from 'axios';
+import { Eventing } from './Eventing';
 interface UserProps {
   id?: number;
   name?: string; //? '?' in interface means variable is optional
   age?: number;
 }
 
-// type alias
-type obj = () => {}; // a function take no argument and return an object
-
 /*
  eventing in JavaScript: An HTML event can be something the browser does, or something a user does. (.addEventListener())
 */
 
 export class User {
-
+  public events: Eventing = new Eventing();
 
   constructor(private data: UserProps) { }
 

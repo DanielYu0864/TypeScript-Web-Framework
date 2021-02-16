@@ -1917,7 +1917,45 @@ module.exports.default = axios;
 
 },{"./utils":"node_modules/axios/lib/utils.js","./helpers/bind":"node_modules/axios/lib/helpers/bind.js","./core/Axios":"node_modules/axios/lib/core/Axios.js","./core/mergeConfig":"node_modules/axios/lib/core/mergeConfig.js","./defaults":"node_modules/axios/lib/defaults.js","./cancel/Cancel":"node_modules/axios/lib/cancel/Cancel.js","./cancel/CancelToken":"node_modules/axios/lib/cancel/CancelToken.js","./cancel/isCancel":"node_modules/axios/lib/cancel/isCancel.js","./helpers/spread":"node_modules/axios/lib/helpers/spread.js","./helpers/isAxiosError":"node_modules/axios/lib/helpers/isAxiosError.js"}],"node_modules/axios/index.js":[function(require,module,exports) {
 module.exports = require('./lib/axios');
-},{"./lib/axios":"node_modules/axios/lib/axios.js"}],"src/models/Users.ts":[function(require,module,exports) {
+},{"./lib/axios":"node_modules/axios/lib/axios.js"}],"src/models/Eventing.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.Eventing = void 0;
+
+var Eventing =
+/** @class */
+function () {
+  function Eventing() {
+    this.events = {};
+  }
+
+  Eventing.prototype.on = function (eventName, callback) {
+    // first step: assign eventName as key in events obj
+    var handlers = this.events[eventName] || [];
+    handlers.push(callback);
+    this.events[eventName] = handlers;
+  };
+
+  Eventing.prototype.trigger = function (eventName) {
+    var handlers = this.events[eventName];
+
+    if (!handlers || handlers.length === 0) {
+      return;
+    }
+
+    handlers.forEach(function (callback) {
+      callback();
+    });
+  };
+
+  return Eventing;
+}();
+
+exports.Eventing = Eventing;
+},{}],"src/models/Users.ts":[function(require,module,exports) {
 "use strict"; // ! Extraction Approach I: Build class User as a 'mega' class with tons of methods (in src/models/User.ts)
 // import axios, { AxiosResponse } from 'axios';
 
@@ -1982,9 +2020,11 @@ exports.User = void 0; // interface UserProps {
 //     }
 //   }
 // }
-// ! Pefactor User to use composition: ########################################################################################################################
+// ! Extraction Approach II: Pefactor User to use composition: ########################################################################################################################
 
 var axios_1 = __importDefault(require("axios"));
+
+var Eventing_1 = require("./Eventing");
 /*
  eventing in JavaScript: An HTML event can be something the browser does, or something a user does. (.addEventListener())
 */
@@ -1995,6 +2035,7 @@ var User =
 function () {
   function User(data) {
     this.data = data;
+    this.events = new Eventing_1.Eventing();
   }
 
   User.prototype.get = function (propName) {
@@ -2029,7 +2070,7 @@ function () {
 }();
 
 exports.User = User;
-},{"axios":"node_modules/axios/index.js"}],"src/index.ts":[function(require,module,exports) {
+},{"axios":"node_modules/axios/index.js","./Eventing":"src/models/Eventing.ts"}],"src/index.ts":[function(require,module,exports) {
 "use strict"; // $ parcel index.html -> ts run client server
 // $ json-server -w db.json  - to run json (backend) server in terminal
 
@@ -2055,14 +2096,15 @@ Object.defineProperty(exports, "__esModule", {
     User Instance | axios -> save()  ->  JSON Server
                           <- fetch() <-
 */
-//! Framework steps
+//! Framework steps and needs
 
 /*
-  1. Create a class to represent a User and all of its data (like name and age)
+  M. Create a class to represent a User and all of its data (like name and age)
     a. User class needs to have the ability to store some data, retrieve it, and change it
     b. Also needs to have the ability to notify the rest of the app when some data is changed
     c. User needs to be able to persist dat to an outside server, and the retrieve it at some future point
-  *Extraction Approach:
+
+    *Extraction Approach:
     I Build class User as a 'mega' class with tons of methods (in src/models/User.ts):
       class User {
         private data: UserProps; -> Object to store info about a particular user (name, age)
@@ -2080,6 +2122,7 @@ Object.defineProperty(exports, "__esModule", {
         events: Events; -> Gives us the ability to tell other parts of our application whenever data tied to a particular user is changed
         sync:Sync; -> Gives us the ability to save this persons data to a remote server, then retrieve it in the future
       }
+
     III Refactor User to be a reusable class that can represent any piece of data, not just a User
 */
 

@@ -1,4 +1,4 @@
-// !Pefactor User to use composition:
+// ! Extraction Approach II:Pefactor User to use composition:
 // type alias
 type Callback = () => void; // a function take no argument and return nothing
 
