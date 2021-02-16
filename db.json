@@ -1,3 +1,49 @@
 {
-  "users": []
+  "users": [
+    {
+      "name": "myname",
+      "age": 20,
+      "id": 1
+    },
+    {
+      "id": 2,
+      "name": "newName",
+      "age": 20
+    },
+    {
+      "name": "new record",
+      "age": 0,
+      "id": 3
+    },
+    {
+      "name": "new record",
+      "age": 0,
+      "id": 4
+    },
+    {
+      "name": "new record",
+      "age": 0,
+      "id": 5
+    },
+    {
+      "name": "new record",
+      "age": 0,
+      "id": 6
+    },
+    {
+      "name": "new record",
+      "age": 0,
+      "id": 7
+    },
+    {
+      "name": "new record",
+      "age": 0,
+      "id": 8
+    },
+    {
+      "name": "new record",
+      "age": 0,
+      "id": 9
+    }
+  ]
 }

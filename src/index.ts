@@ -38,27 +38,21 @@
         save (): Promise; -> Saves some data about this user to the server
       }
 
-    II Pefactor User to use composition
+    II Pefactor User to use composition:
+      class User {
+        attributes:Attributes; -> Gives us the ability to store properties tied to this user (name, age, etc)
+        events: Events; -> Gives us the ability to tell other parts of our application whenever data tied to a particular user is changed
+        sync:Sync; -> Gives us the ability to save this persons data to a remote server, then retrieve it in the future
+      }
     III Refactor User to be a reusable class that can represent any piece of data, not just a User
 */
 
 
 import { User } from './models/Users';
 
-const user = new User({ name: 'dan', age: 25 });
-const newUser = new User({}); // also works 'cause the ? in the interface make variable is optional
+const user = new User({ name: 'new record', age: 0 });
 
-user.on('change', () => {
-  console.log('Change#1');
-});
-user.on('click', () => {
-  console.log('clicked');
-});
-user.on('change', () => {
-  console.log('Change#2')
-});
+// user.fetch();
 
-console.log(user);
 
-user.trigger('change');
-user.trigger('click');
+user.save();
