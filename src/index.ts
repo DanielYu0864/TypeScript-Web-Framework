@@ -42,8 +42,21 @@
     II Pefactor User to use composition:
       class User {
         attributes:Attributes; -> Gives us the ability to store properties tied to this user (name, age, etc)
+          \=> class Attributes<T> { ** T = generic type
+            private data: T;
+            get<K extends keyof T>(key: K): T[K];
+            set(update: T):void;
+          }
         events: Events; -> Gives us the ability to tell other parts of our application whenever data tied to a particular user is changed
-        sync:Sync; -> Gives us the ability to save this persons data to a remote server, then retrieve it in the future
+          \=> class Eventing {
+            on(eventName: string, callback:() => {});
+            trigger(eventName:string):void;
+          }
+        sync:Sync<UserProps>; -> Gives us the ability to save this persons data to a remote server, then retrieve it in the future
+          \=> class Sync<T> {
+            save(id:num, data:T): AxoisPromise<T>;
+            fetch(id:number):AxiosPromise<T>;
+          }
       }
 
     III Refactor User to be a reusable class that can represent any piece of data, not just a User
