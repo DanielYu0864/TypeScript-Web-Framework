@@ -71,6 +71,37 @@
 
 
 // ! Extraction Approach II: Pefactor User to use composition: ########################################################################################################################
+// import { Eventing } from './Eventing';
+// import { Sync } from './Sync';
+// import { Attributes } from './Attributes';
+
+// export interface UserProps {
+//   id?: number;
+//   name?: string; //? '?' in interface means variable is optional
+//   age?: number;
+// }
+
+// /*
+//  eventing in JavaScript: An HTML event can be something the browser does, or something a user does. (.addEventListener())
+// */
+
+// const rootUrl = 'http://localhost:3000/users';
+
+// export class User {
+//   public events: Eventing = new Eventing();
+//   public sync: Sync<UserProps> = new Sync<UserProps>(rootUrl);
+//   public attributes: Attributes<UserProps>;
+
+//   constructor(attrs:   UserProps) {
+//     this.attributes = new Attributes<UserProps>(attrs);
+//   }
+// }
+
+//! III Refactor User to be a reusable class that can represent any piece of data, not just a User
+
+//* first type: Direct passthrough of arguments
+//* second type: Need coordiation between different modules in User
+
 import { Eventing } from './Eventing';
 import { Sync } from './Sync';
 import { Attributes } from './Attributes';
@@ -92,7 +123,19 @@ export class User {
   public sync: Sync<UserProps> = new Sync<UserProps>(rootUrl);
   public attributes: Attributes<UserProps>;
 
-  constructor(attrs:   UserProps) {
+  constructor(attrs: UserProps) {
     this.attributes = new Attributes<UserProps>(attrs);
+  }
+  //* first type: Direct passthrough of arguments
+  get on() {
+    return this.events.on; //* return a reference to the events.on() instead call the function
+  }
+
+  get trigger() {
+    return this.events.trigger;
+  }
+
+  get get() {
+    return this.attributes.get;
   }
 }

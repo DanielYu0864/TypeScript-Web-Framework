@@ -118,7 +118,9 @@ parcelRequire = (function (modules, cache, entry, globalName) {
 
   return newRequire;
 })({"src/models/Eventing.ts":[function(require,module,exports) {
-"use strict";
+"use strict"; // ! Extraction Approach II:Pefactor User to use composition:
+// type alias
+// type Callback = () => void; // a function take no argument and return nothing
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -1956,7 +1958,8 @@ module.exports.default = axios;
 },{"./utils":"node_modules/axios/lib/utils.js","./helpers/bind":"node_modules/axios/lib/helpers/bind.js","./core/Axios":"node_modules/axios/lib/core/Axios.js","./core/mergeConfig":"node_modules/axios/lib/core/mergeConfig.js","./defaults":"node_modules/axios/lib/defaults.js","./cancel/Cancel":"node_modules/axios/lib/cancel/Cancel.js","./cancel/CancelToken":"node_modules/axios/lib/cancel/CancelToken.js","./cancel/isCancel":"node_modules/axios/lib/cancel/isCancel.js","./helpers/spread":"node_modules/axios/lib/helpers/spread.js","./helpers/isAxiosError":"node_modules/axios/lib/helpers/isAxiosError.js"}],"node_modules/axios/index.js":[function(require,module,exports) {
 module.exports = require('./lib/axios');
 },{"./lib/axios":"node_modules/axios/lib/axios.js"}],"src/models/Sync.ts":[function(require,module,exports) {
-"use strict";
+"use strict"; // ! Extraction Approach II: Pefactor User to use composition: ########################################################################################################################
+// import axios, { AxiosPromise } from 'axios';
 
 var __importDefault = this && this.__importDefault || function (mod) {
   return mod && mod.__esModule ? mod : {
@@ -1967,7 +1970,33 @@ var __importDefault = this && this.__importDefault || function (mod) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.Sync = void 0; // ! Extraction Approach II: Pefactor User to use composition: ########################################################################################################################
+exports.Sync = void 0; // interface HasId {
+//   id?: number
+// }
+// export class Sync<T extends HasId> {
+//   constructor(public rootUrl: string) { };
+//   fetch(id: number): AxiosPromise {
+//     return axios.get(`${this.rootUrl}/${id}`);
+//   }
+//   save(data: T): AxiosPromise {
+//     /*
+//       $ tsc --init
+//       generate the tsconfig.json
+//       in Strict Type-Checking Options
+//       turn "strict": true                           /* Enable all strict type-checking options
+//       make id: number | undefined (default id: number)
+//     */
+//     const { id } = data;
+//     if (id) {
+//       // update
+//       return axios.put(`${this.rootUrl}/${id}`, data);
+//     } else {
+//       // create
+//       return axios.post(this.rootUrl, data);
+//     }
+//   }
+// }
+//! III Refactor User to be a reusable class that can represent any piece of data, not just a User
 
 var axios_1 = __importDefault(require("axios"));
 
@@ -2013,7 +2042,16 @@ exports.Sync = Sync;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.Attributes = void 0;
+exports.Attributes = void 0; // export class Attributes<T> {
+//   constructor(private data: T) { }
+//   get<K extends keyof T>(key: K): T[K] {
+//     return this.data[key];
+//   }
+//   set(update: T): void {
+//     Object.assign(this.data, update);
+//   }
+// }
+//! III Refactor User to be a reusable class that can represent any piece of data, not just a User
 
 var Attributes =
 /** @class */
@@ -2094,6 +2132,29 @@ exports.User = void 0; // interface UserProps {
 //   }
 // }
 // ! Extraction Approach II: Pefactor User to use composition: ########################################################################################################################
+// import { Eventing } from './Eventing';
+// import { Sync } from './Sync';
+// import { Attributes } from './Attributes';
+// export interface UserProps {
+//   id?: number;
+//   name?: string; //? '?' in interface means variable is optional
+//   age?: number;
+// }
+// /*
+//  eventing in JavaScript: An HTML event can be something the browser does, or something a user does. (.addEventListener())
+// */
+// const rootUrl = 'http://localhost:3000/users';
+// export class User {
+//   public events: Eventing = new Eventing();
+//   public sync: Sync<UserProps> = new Sync<UserProps>(rootUrl);
+//   public attributes: Attributes<UserProps>;
+//   constructor(attrs:   UserProps) {
+//     this.attributes = new Attributes<UserProps>(attrs);
+//   }
+// }
+//! III Refactor User to be a reusable class that can represent any piece of data, not just a User
+//* first type: Direct passthrough of arguments
+//* second type: Need coordiation between different modules in User
 
 var Eventing_1 = require("./Eventing");
 
@@ -2116,6 +2177,28 @@ function () {
     this.attributes = new Attributes_1.Attributes(attrs);
   }
 
+  Object.defineProperty(User.prototype, "on", {
+    //* first type: Direct passthrough of arguments
+    get: function get() {
+      return this.events.on; //* return a reference to the events.on() instead call the function
+    },
+    enumerable: false,
+    configurable: true
+  });
+  Object.defineProperty(User.prototype, "trigger", {
+    get: function get() {
+      return this.events.trigger;
+    },
+    enumerable: false,
+    configurable: true
+  });
+  Object.defineProperty(User.prototype, "get", {
+    get: function get() {
+      return this.attributes.get;
+    },
+    enumerable: false,
+    configurable: true
+  });
   return User;
 }();
 
@@ -2187,6 +2270,27 @@ Object.defineProperty(exports, "__esModule", {
       }
 
     III Refactor User to be a reusable class that can represent any piece of data, not just a User
+      Caller function
+        \=> class User {
+          get()
+          set()
+          on()
+          trigger()
+          fetch()
+          save()
+        }
+          \=> class attributes<T> {
+            get(key:K):T[K]
+            set(update:void)
+          }
+          \=> class Eventing {
+            on(eventName:string, callback: () => {})
+            trigger(eventName: string): void
+          }
+          \=> class Sync<T> {
+            fetch(id: number): Promise
+            save(data: T): Promise
+          }
 */
 
 var Users_1 = require("./models/Users");
@@ -2194,10 +2298,13 @@ var Users_1 = require("./models/Users");
 var user = new Users_1.User({
   name: 'new record',
   age: 0
-});
-user.events.on('change', function () {
-  console.log('changed!');
-});
+}); // quick reminder on accessores "get"
+// class Person {
+//   constructor(public firstName: string, public lastName: string) { }
+//   get fullName(): string { // not really calling a function * don't need "()"
+//     return `${this.firstName} ${this.lastName}`;
+//   }
+// }
 },{"./models/Users":"src/models/Users.ts"}],"../../../../AppData/Roaming/npm/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
@@ -2226,7 +2333,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "4500" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "1682" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
