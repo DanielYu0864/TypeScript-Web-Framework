@@ -83,6 +83,7 @@
           }
 */
 
+//* inheritance in this project
 
 import { User } from './models/Users';
 

@@ -72,7 +72,7 @@
 
 // ! Extraction Approach II: Pefactor User to use composition: ########################################################################################################################
 // import { Eventing } from './Eventing';
-// import { Sync } from './Sync';
+// import { ApiSync } from './ApiSync';
 // import { Attributes } from './Attributes';
 
 // export interface UserProps {
@@ -102,11 +102,10 @@
 //* first type: Direct passthrough of arguments
 //* second type: Need coordiation between different modules in User
 
-import { Eventing } from './Eventing';
-import { Sync } from './Sync';
+import { Model } from './Models';
 import { Attributes } from './Attributes';
-import { AxiosResponse } from 'axios';
-
+import { ApiSync } from './ApiSync';
+import { Eventing } from './Eventing';
 export interface UserProps {
   id?: number;
   name?: string; //? '?' in interface means variable is optional
@@ -119,58 +118,13 @@ export interface UserProps {
 
 const rootUrl = 'http://localhost:3000/users';
 
-export class User {
-  public events: Eventing = new Eventing();
-  public sync: Sync<UserProps> = new Sync<UserProps>(rootUrl);
-  public attributes: Attributes<UserProps>;
-
-  constructor(attrs: UserProps) {
-    this.attributes = new Attributes<UserProps>(attrs);
-  }
-  //* first type: Direct passthrough of arguments
-  get on() {
-    return this.events.on; //* return a reference to the events.on() instead call the function
-  }
-
-  get trigger() {
-    return this.events.trigger;
-  }
-
-  get get() {
-    return this.attributes.get;
-  }
-
-  //* second type: Need coordiation between different modules in User
-
-  set(update: UserProps): void {
-    // set() then trigger()
-    this.attributes.set(update);
-    this.events.trigger('change');
-  }
-
-  fetch(): void {
-    // get() then fetch()
-    const id = this.get('id'); // the get() in the Users.ts
-
-    if (typeof id !== 'number') {
-      throw new Error('Cannot fetch without an id');
-    }
-
-    this.sync.fetch(id).then((response: AxiosResponse): void => {
-      this.set(response.data); // the set() inside of Users.ts
-    })
-
-  }
-
-  save(): void {
-    // getAll() then save()
-    this.sync.save(this.attributes.getAll())
-      .then((response: AxiosResponse): void => {
-        this.trigger('save');
-      })
-      .catch(() => {
-        this.trigger('error');
-      })
+export class User extends Model<UserProps> {
+  static buildUser(attrs: UserProps): User {
+    return new User(
+      new Attributes<UserProps>(attrs),
+      new Eventing(),
+      new ApiSync<UserProps>(rootUrl)
+    );
   }
 
 }
