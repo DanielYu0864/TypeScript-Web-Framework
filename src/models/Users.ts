@@ -105,6 +105,7 @@
 import { Eventing } from './Eventing';
 import { Sync } from './Sync';
 import { Attributes } from './Attributes';
+import { AxiosResponse } from 'axios';
 
 export interface UserProps {
   id?: number;
@@ -138,4 +139,38 @@ export class User {
   get get() {
     return this.attributes.get;
   }
+
+  //* second type: Need coordiation between different modules in User
+
+  set(update: UserProps): void {
+    // set() then trigger()
+    this.attributes.set(update);
+    this.events.trigger('change');
+  }
+
+  fetch(): void {
+    // get() then fetch()
+    const id = this.get('id'); // the get() in the Users.ts
+
+    if (typeof id !== 'number') {
+      throw new Error('Cannot fetch without an id');
+    }
+
+    this.sync.fetch(id).then((response: AxiosResponse): void => {
+      this.set(response.data); // the set() inside of Users.ts
+    })
+
+  }
+
+  save(): void {
+    // getAll() then save()
+    this.sync.save(this.attributes.getAll())
+      .then((response: AxiosResponse): void => {
+        this.trigger('save');
+      })
+      .catch(() => {
+        this.trigger('error');
+      })
+  }
+
 }

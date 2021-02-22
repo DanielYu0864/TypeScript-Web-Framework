@@ -86,9 +86,9 @@
 
 import { User } from './models/Users';
 
-const user = new User({ name: 'new record', age: 0 });
+const user = new User({ id: 1, name: 'changed new name', age: 0 });
 
-// quick reminder on accessores "get"
+//* Reminder on accessores "get"
 
 // class Person {
 //   constructor(public firstName: string, public lastName: string) { }
@@ -97,3 +97,29 @@ const user = new User({ name: 'new record', age: 0 });
 //     return `${this.firstName} ${this.lastName}`;
 //   }
 // }
+
+//* Reminder on how 'this' works in javascript
+
+/*
+const colors = {
+  color: 'red',
+  printColor() {
+    console.log(this.color);
+  }
+}
+
+colors.printColor(); // works
+
+const printColor = colors.printColor;
+
+printColor(); // cause error 'cause the 'this' is undefined
+*/
+
+
+user.on('save', () => {
+  console.log(user);
+});
+
+// user.trigger('change');
+// user.set({ name: 'New name' })
+user.save();

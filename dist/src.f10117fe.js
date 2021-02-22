@@ -131,27 +131,29 @@ var Eventing =
 /** @class */
 function () {
   function Eventing() {
+    var _this = this;
+
     this.events = {};
+
+    this.on = function (eventName, callback) {
+      // first step: assign eventName as key in events obj
+      var handlers = _this.events[eventName] || [];
+      handlers.push(callback);
+      _this.events[eventName] = handlers;
+    };
+
+    this.trigger = function (eventName) {
+      var handlers = _this.events[eventName];
+
+      if (!handlers || handlers.length === 0) {
+        return;
+      }
+
+      handlers.forEach(function (callback) {
+        callback();
+      });
+    };
   }
-
-  Eventing.prototype.on = function (eventName, callback) {
-    // first step: assign eventName as key in events obj
-    var handlers = this.events[eventName] || [];
-    handlers.push(callback);
-    this.events[eventName] = handlers;
-  };
-
-  Eventing.prototype.trigger = function (eventName) {
-    var handlers = this.events[eventName];
-
-    if (!handlers || handlers.length === 0) {
-      return;
-    }
-
-    handlers.forEach(function (callback) {
-      callback();
-    });
-  };
 
   return Eventing;
 }();
@@ -2057,15 +2059,21 @@ var Attributes =
 /** @class */
 function () {
   function Attributes(data) {
-    this.data = data;
-  }
+    var _this = this;
 
-  Attributes.prototype.get = function (key) {
-    return this.data[key];
-  };
+    this.data = data;
+
+    this.get = function (key) {
+      return _this.data[key];
+    };
+  }
 
   Attributes.prototype.set = function (update) {
     Object.assign(this.data, update);
+  };
+
+  Attributes.prototype.getAll = function () {
+    return this.data;
   };
 
   return Attributes;
@@ -2198,7 +2206,41 @@ function () {
     },
     enumerable: false,
     configurable: true
-  });
+  }); //* second type: Need coordiation between different modules in User
+
+  User.prototype.set = function (update) {
+    // set() then trigger()
+    this.attributes.set(update);
+    this.events.trigger('change');
+  };
+
+  User.prototype.fetch = function () {
+    var _this = this; // get() then fetch()
+
+
+    var id = this.get('id'); // the get() in the Users.ts
+
+    if (typeof id !== 'number') {
+      throw new Error('Cannot fetch without an id');
+    }
+
+    this.sync.fetch(id).then(function (response) {
+      _this.set(response.data); // the set() inside of Users.ts
+
+    });
+  };
+
+  User.prototype.save = function () {
+    var _this = this; // getAll() then save()
+
+
+    this.sync.save(this.attributes.getAll()).then(function (response) {
+      _this.trigger('save');
+    }).catch(function () {
+      _this.trigger('error');
+    });
+  };
+
   return User;
 }();
 
@@ -2296,15 +2338,39 @@ Object.defineProperty(exports, "__esModule", {
 var Users_1 = require("./models/Users");
 
 var user = new Users_1.User({
-  name: 'new record',
+  id: 1,
+  name: 'changed new name',
   age: 0
-}); // quick reminder on accessores "get"
+}); //* Reminder on accessores "get"
 // class Person {
 //   constructor(public firstName: string, public lastName: string) { }
 //   get fullName(): string { // not really calling a function * don't need "()"
 //     return `${this.firstName} ${this.lastName}`;
 //   }
 // }
+//* Reminder on how 'this' works in javascript
+
+/*
+const colors = {
+  color: 'red',
+  printColor() {
+    console.log(this.color);
+  }
+}
+
+colors.printColor(); // works
+
+const printColor = colors.printColor;
+
+printColor(); // cause error 'cause the 'this' is undefined
+*/
+
+user.on('save', function () {
+  console.log(user);
+}); // user.trigger('change');
+// user.set({ name: 'New name' })
+
+user.save();
 },{"./models/Users":"src/models/Users.ts"}],"../../../../AppData/Roaming/npm/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
@@ -2333,7 +2399,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "1682" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "14713" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
