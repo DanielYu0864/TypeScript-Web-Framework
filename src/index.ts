@@ -22,7 +22,7 @@
 
 //! Framework steps and needs
 /*
-  M. Create a class to represent a User and all of its data (like name and age)
+  1. Create a class to represent a User and all of its data (like name and age)
     a. User class needs to have the ability to store some data, retrieve it, and change it
     b. Also needs to have the ability to notify the rest of the app when some data is changed
     c. User needs to be able to persist dat to an outside server, and the retrieve it at some future point
@@ -85,9 +85,9 @@
 
 //* inheritance in this project
 
-import { User } from './models/Users';
+// import { User } from './models/Users';
 
-const user = new User({ id: 1, name: 'changed new name', age: 0 });
+// const user = User.buildUser({ id: 1 });
 
 //* Reminder on accessores "get"
 
@@ -117,10 +117,23 @@ printColor(); // cause error 'cause the 'this' is undefined
 */
 
 
-user.on('save', () => {
-  console.log(user);
-});
+// user.on('change', () => {
+//   console.log(user);
+// });
 
-// user.trigger('change');
-// user.set({ name: 'New name' })
-user.save();
+// // user.trigger('change');
+// // user.set({ name: 'New name' })
+// user.fetch();
+
+
+//!
+
+import { Collection } from './models/Collection';
+
+const collection = new Collection('http://localhost:3000/users')
+
+collection.on('change', () => {
+  console.log(collection);
+})
+
+collection.fetch();

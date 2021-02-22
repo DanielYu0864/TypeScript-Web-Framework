@@ -29,17 +29,22 @@ export class Model<T extends HasId> {
     private sync: Sync<T>
   ) { }
   //* first type: Direct passthrough of arguments
-  get on() {
-    return this.events.on; //* return a reference to the events.on() instead call the function
-  }
+  // get on() {
+  //   return this.events.on; //* return a reference to the events.on() instead call the function
+  // }
+  // //* get on() is equal to on = this.events.on;
 
-  get trigger() {
-    return this.events.trigger;
-  }
+  // get trigger() {
+  //   return this.events.trigger;
+  // }
 
-  get get() {
-    return this.attributes.get;
-  }
+  // get get() {
+  //   return this.attributes.get;
+  // }
+  // explain in TypeScript: the complete developer's guide 180. Shortended Passthrough Methods
+  on = this.events.on;
+  trigger = this.events.trigger;
+  get = this.attributes.get;
 
   //* second type: Need coordiation between different modules in User
 
