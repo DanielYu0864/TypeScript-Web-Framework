@@ -127,10 +127,9 @@ printColor(); // cause error 'cause the 'this' is undefined
 
 
 //!
+import { User } from './models/Users';
 
-import { Collection } from './models/Collection';
-
-const collection = new Collection('http://localhost:3000/users')
+const collection = User.buildUserCollection()
 
 collection.on('change', () => {
   console.log(collection);

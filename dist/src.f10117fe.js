@@ -117,7 +117,119 @@ parcelRequire = (function (modules, cache, entry, globalName) {
   }
 
   return newRequire;
-})({"node_modules/axios/lib/helpers/bind.js":[function(require,module,exports) {
+})({"src/models/Models.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.Model = void 0;
+
+var Model =
+/** @class */
+function () {
+  function Model(attributes, events, sync) {
+    this.attributes = attributes;
+    this.events = events;
+    this.sync = sync; //* first type: Direct passthrough of arguments
+    // get on() {
+    //   return this.events.on; //* return a reference to the events.on() instead call the function
+    // }
+    // //* get on() is equal to on = this.events.on;
+    // get trigger() {
+    //   return this.events.trigger;
+    // }
+    // get get() {
+    //   return this.attributes.get;
+    // }
+    // explain in TypeScript: the complete developer's guide 180. Shortended Passthrough Methods
+
+    this.on = this.events.on;
+    this.trigger = this.events.trigger;
+    this.get = this.attributes.get;
+  } //* second type: Need coordiation between different modules in User
+
+
+  Model.prototype.set = function (update) {
+    // set() then trigger()
+    this.attributes.set(update);
+    this.events.trigger('change');
+  };
+
+  Model.prototype.fetch = function () {
+    var _this = this; // get() then fetch()
+
+
+    var id = this.get('id'); // the get() in the Users.ts
+
+    if (typeof id !== 'number') {
+      throw new Error('Cannot fetch without an id');
+    }
+
+    this.sync.fetch(id).then(function (response) {
+      _this.set(response.data); // the set() inside of Users.ts
+
+    });
+  };
+
+  Model.prototype.save = function () {
+    var _this = this; // getAll() then save()
+
+
+    this.sync.save(this.attributes.getAll()).then(function (response) {
+      _this.trigger('save');
+    }).catch(function () {
+      _this.trigger('error');
+    });
+  };
+
+  return Model;
+}();
+
+exports.Model = Model;
+},{}],"src/models/Attributes.ts":[function(require,module,exports) {
+"use strict"; // ! Extraction Approach II: Pefactor User to use composition: ########################################################################################################################
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.Attributes = void 0; // export class Attributes<T> {
+//   constructor(private data: T) { }
+//   get<K extends keyof T>(key: K): T[K] {
+//     return this.data[key];
+//   }
+//   set(update: T): void {
+//     Object.assign(this.data, update);
+//   }
+// }
+//! III Refactor User to be a reusable class that can represent any piece of data, not just a User
+
+var Attributes =
+/** @class */
+function () {
+  function Attributes(data) {
+    var _this = this;
+
+    this.data = data;
+
+    this.get = function (key) {
+      return _this.data[key];
+    };
+  }
+
+  Attributes.prototype.set = function (update) {
+    Object.assign(this.data, update);
+  };
+
+  Attributes.prototype.getAll = function () {
+    return this.data;
+  };
+
+  return Attributes;
+}();
+
+exports.Attributes = Attributes;
+},{}],"node_modules/axios/lib/helpers/bind.js":[function(require,module,exports) {
 'use strict';
 
 module.exports = function bind(fn, thisArg) {
@@ -1917,119 +2029,7 @@ module.exports.default = axios;
 
 },{"./utils":"node_modules/axios/lib/utils.js","./helpers/bind":"node_modules/axios/lib/helpers/bind.js","./core/Axios":"node_modules/axios/lib/core/Axios.js","./core/mergeConfig":"node_modules/axios/lib/core/mergeConfig.js","./defaults":"node_modules/axios/lib/defaults.js","./cancel/Cancel":"node_modules/axios/lib/cancel/Cancel.js","./cancel/CancelToken":"node_modules/axios/lib/cancel/CancelToken.js","./cancel/isCancel":"node_modules/axios/lib/cancel/isCancel.js","./helpers/spread":"node_modules/axios/lib/helpers/spread.js","./helpers/isAxiosError":"node_modules/axios/lib/helpers/isAxiosError.js"}],"node_modules/axios/index.js":[function(require,module,exports) {
 module.exports = require('./lib/axios');
-},{"./lib/axios":"node_modules/axios/lib/axios.js"}],"src/models/Models.ts":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.Model = void 0;
-
-var Model =
-/** @class */
-function () {
-  function Model(attributes, events, sync) {
-    this.attributes = attributes;
-    this.events = events;
-    this.sync = sync; //* first type: Direct passthrough of arguments
-    // get on() {
-    //   return this.events.on; //* return a reference to the events.on() instead call the function
-    // }
-    // //* get on() is equal to on = this.events.on;
-    // get trigger() {
-    //   return this.events.trigger;
-    // }
-    // get get() {
-    //   return this.attributes.get;
-    // }
-    // explain in TypeScript: the complete developer's guide 180. Shortended Passthrough Methods
-
-    this.on = this.events.on;
-    this.trigger = this.events.trigger;
-    this.get = this.attributes.get;
-  } //* second type: Need coordiation between different modules in User
-
-
-  Model.prototype.set = function (update) {
-    // set() then trigger()
-    this.attributes.set(update);
-    this.events.trigger('change');
-  };
-
-  Model.prototype.fetch = function () {
-    var _this = this; // get() then fetch()
-
-
-    var id = this.get('id'); // the get() in the Users.ts
-
-    if (typeof id !== 'number') {
-      throw new Error('Cannot fetch without an id');
-    }
-
-    this.sync.fetch(id).then(function (response) {
-      _this.set(response.data); // the set() inside of Users.ts
-
-    });
-  };
-
-  Model.prototype.save = function () {
-    var _this = this; // getAll() then save()
-
-
-    this.sync.save(this.attributes.getAll()).then(function (response) {
-      _this.trigger('save');
-    }).catch(function () {
-      _this.trigger('error');
-    });
-  };
-
-  return Model;
-}();
-
-exports.Model = Model;
-},{}],"src/models/Attributes.ts":[function(require,module,exports) {
-"use strict"; // ! Extraction Approach II: Pefactor User to use composition: ########################################################################################################################
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.Attributes = void 0; // export class Attributes<T> {
-//   constructor(private data: T) { }
-//   get<K extends keyof T>(key: K): T[K] {
-//     return this.data[key];
-//   }
-//   set(update: T): void {
-//     Object.assign(this.data, update);
-//   }
-// }
-//! III Refactor User to be a reusable class that can represent any piece of data, not just a User
-
-var Attributes =
-/** @class */
-function () {
-  function Attributes(data) {
-    var _this = this;
-
-    this.data = data;
-
-    this.get = function (key) {
-      return _this.data[key];
-    };
-  }
-
-  Attributes.prototype.set = function (update) {
-    Object.assign(this.data, update);
-  };
-
-  Attributes.prototype.getAll = function () {
-    return this.data;
-  };
-
-  return Attributes;
-}();
-
-exports.Attributes = Attributes;
-},{}],"src/models/ApiSync.ts":[function(require,module,exports) {
+},{"./lib/axios":"node_modules/axios/lib/axios.js"}],"src/models/ApiSync.ts":[function(require,module,exports) {
 "use strict"; // ! Extraction Approach II: Pefactor User to use composition: ########################################################################################################################
 // import axios, { AxiosPromise } from 'axios';
 
@@ -2150,7 +2150,66 @@ function () {
 }();
 
 exports.Eventing = Eventing;
-},{}],"src/models/Users.ts":[function(require,module,exports) {
+},{}],"src/models/Collection.ts":[function(require,module,exports) {
+"use strict";
+
+var __importDefault = this && this.__importDefault || function (mod) {
+  return mod && mod.__esModule ? mod : {
+    "default": mod
+  };
+};
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.Collection = void 0;
+
+var axios_1 = __importDefault(require("axios"));
+
+var Eventing_1 = require("./Eventing");
+
+var Collection =
+/** @class */
+function () {
+  function Collection(rootUrl, deserialize) {
+    this.rootUrl = rootUrl;
+    this.deserialize = deserialize;
+    this.models = [];
+    this.events = new Eventing_1.Eventing();
+  }
+
+  Object.defineProperty(Collection.prototype, "on", {
+    get: function get() {
+      return this.events.on;
+    },
+    enumerable: false,
+    configurable: true
+  });
+  Object.defineProperty(Collection.prototype, "trigger", {
+    get: function get() {
+      return this.events.trigger;
+    },
+    enumerable: false,
+    configurable: true
+  });
+
+  Collection.prototype.fetch = function () {
+    var _this = this;
+
+    axios_1.default.get(this.rootUrl).then(function (response) {
+      response.data.forEach(function (value) {
+        _this.models.push(_this.deserialize(value));
+      });
+
+      _this.trigger('change');
+    });
+  };
+
+  return Collection;
+}();
+
+exports.Collection = Collection;
+},{"axios":"node_modules/axios/index.js","./Eventing":"src/models/Eventing.ts"}],"src/models/Users.ts":[function(require,module,exports) {
 "use strict"; // ! Extraction Approach I: Build class User as a 'mega' class with tons of methods (in src/models/User.ts)
 // import axios, { AxiosResponse } from 'axios';
 
@@ -2267,6 +2326,8 @@ var Attributes_1 = require("./Attributes");
 var ApiSync_1 = require("./ApiSync");
 
 var Eventing_1 = require("./Eventing");
+
+var Collection_1 = require("./Collection");
 /*
  eventing in JavaScript: An HTML event can be something the browser does, or something a user does. (.addEventListener())
 */
@@ -2287,73 +2348,17 @@ function (_super) {
     return new User(new Attributes_1.Attributes(attrs), new Eventing_1.Eventing(), new ApiSync_1.ApiSync(rootUrl));
   };
 
+  User.buildUserCollection = function () {
+    return new Collection_1.Collection(rootUrl, function (json) {
+      return User.buildUser(json);
+    });
+  };
+
   return User;
 }(Models_1.Model);
 
 exports.User = User;
-},{"./Models":"src/models/Models.ts","./Attributes":"src/models/Attributes.ts","./ApiSync":"src/models/ApiSync.ts","./Eventing":"src/models/Eventing.ts"}],"src/models/Collection.ts":[function(require,module,exports) {
-"use strict";
-
-var __importDefault = this && this.__importDefault || function (mod) {
-  return mod && mod.__esModule ? mod : {
-    "default": mod
-  };
-};
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.Collection = void 0;
-
-var axios_1 = __importDefault(require("axios"));
-
-var Users_1 = require("./Users");
-
-var Eventing_1 = require("./Eventing");
-
-var Collection =
-/** @class */
-function () {
-  function Collection(rootUrl) {
-    this.rootUrl = rootUrl;
-    this.models = [];
-    this.events = new Eventing_1.Eventing();
-  }
-
-  Object.defineProperty(Collection.prototype, "on", {
-    get: function get() {
-      return this.events.on;
-    },
-    enumerable: false,
-    configurable: true
-  });
-  Object.defineProperty(Collection.prototype, "trigger", {
-    get: function get() {
-      return this.events.trigger;
-    },
-    enumerable: false,
-    configurable: true
-  });
-
-  Collection.prototype.fetch = function () {
-    var _this = this;
-
-    axios_1.default.get(this.rootUrl).then(function (response) {
-      response.data.forEach(function (value) {
-        var user = Users_1.User.buildUser(value);
-
-        _this.models.push(user);
-      });
-
-      _this.trigger('change');
-    });
-  };
-
-  return Collection;
-}();
-
-exports.Collection = Collection;
-},{"axios":"node_modules/axios/index.js","./Users":"src/models/Users.ts","./Eventing":"src/models/Eventing.ts"}],"src/index.ts":[function(require,module,exports) {
+},{"./Models":"src/models/Models.ts","./Attributes":"src/models/Attributes.ts","./ApiSync":"src/models/ApiSync.ts","./Eventing":"src/models/Eventing.ts","./Collection":"src/models/Collection.ts"}],"src/index.ts":[function(require,module,exports) {
 "use strict"; // $ parcel index.html -> ts run client server
 // $ json-server -w db.json  - to run json (backend) server in terminal
 
@@ -2476,14 +2481,14 @@ printColor(); // cause error 'cause the 'this' is undefined
 // user.fetch();
 //!
 
-var Collection_1 = require("./models/Collection");
+var Users_1 = require("./models/Users");
 
-var collection = new Collection_1.Collection('http://localhost:3000/users');
+var collection = Users_1.User.buildUserCollection();
 collection.on('change', function () {
   console.log(collection);
 });
 collection.fetch();
-},{"./models/Collection":"src/models/Collection.ts"}],"../../../../AppData/Roaming/npm/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"./models/Users":"src/models/Users.ts"}],"../../../../AppData/Roaming/npm/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -2511,7 +2516,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "1523" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "7346" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
