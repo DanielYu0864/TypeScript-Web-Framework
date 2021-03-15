@@ -127,12 +127,11 @@ printColor(); // cause error 'cause the 'this' is undefined
 
 
 //!
-import { User } from './models/Users';
 
-const collection = User.buildUserCollection()
+import { UserForm } from './views/UserForm'
 
-collection.on('change', () => {
-  console.log(collection);
-})
+const userForm = new UserForm(
+  document.getElementById('root')
+);
 
-collection.fetch();
+userForm.render();
