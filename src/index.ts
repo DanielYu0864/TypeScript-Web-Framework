@@ -129,9 +129,13 @@ printColor(); // cause error 'cause the 'this' is undefined
 //!
 
 import { UserForm } from './views/UserForm'
+import { User } from './models/Users'
+
+const user = User.buildUser({ name: 'NAME', age: 20 })
 
 const userForm = new UserForm(
-  document.getElementById('root')
+  document.getElementById('root'),
+  user
 );
 
 userForm.render();

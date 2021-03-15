@@ -136,4 +136,8 @@ export class User extends Model<UserProps> {
     );
   }
 
+  setRandomAge(): void {
+    const age = Math.round(Math.random() * 100);
+    this.set({ age });
+  }
 }
