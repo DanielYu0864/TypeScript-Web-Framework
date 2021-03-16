@@ -1,0 +1,15 @@
+import { View } from './View'
+import { User, UserProps } from '../models/Users'
+
+export class UserShow extends View<User, UserProps> {
+  template(): string {
+    return `
+      <div>
+        <h1>User Show</h1>
+        <div>User Name: ${this.model.get('name')}</div>
+        <div>User Age: ${this.model.get('age')}</div>
+      </div>
+    `;
+  }
+
+}
